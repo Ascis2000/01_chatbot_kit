@@ -1,0 +1,277 @@
+
+import React from 'react';
+import { createChatBotMessage, createClientMessage } from 'react-chatbot-kit';
+
+const ActionProvider = ({ createChatBotMessage, setState, children }) => {
+
+	const handleHello = () => {
+		const messageWithProperties = createChatBotMessage('Hola. Encantad@ de conocerteeee', {
+			payload: {},
+			delay: 500,
+		});
+
+		setState((prev) => ({
+			...prev,
+			messages: [...prev.messages, messageWithProperties],
+		}));
+	};
+
+	const handleStartOptions = () => {
+		const botMessage = createChatBotMessage("Selecciona una opción:", {
+			widget: "startOptions",
+		});
+
+		setState((prev) => ({
+			...prev,
+			messages: [...prev.messages, botMessage],
+		}));
+	};
+
+	const handleDog = () => {
+		const botMessage = createChatBotMessage("Here's a nice dog picture for you!", {
+			widget: 'dogPicture',
+		});
+
+		setState((prev) => ({
+			...prev,
+			messages: [...prev.messages, botMessage],
+		}));
+	};
+
+	const handleGetUsers = () => {
+		const botMessage = createChatBotMessage("Aquí están los usuarios:", {
+			widget: 'getUsers',
+		});
+
+		setState((prev) => ({
+			...prev,
+			messages: [...prev.messages, botMessage],
+		}));
+	};
+
+	const handleUserForm = () => {
+		const botMessage = createChatBotMessage("Formulario:", {
+			widget: 'showUserForm',
+		});
+
+		setState((prev) => ({
+			...prev,
+			messages: [...prev.messages, botMessage],
+		}));
+	};
+
+
+	const handleOptionSelection = (option, texto) => {
+		// Mostrar mensaje del usuario reflejando la selección
+		const userMessage = createClientMessage(`Mi selección es: "${texto}"`, {
+			delay: 500,
+		});
+
+		setState((prevState) => ({
+			...prevState,
+			messages: [...prevState.messages, userMessage],
+		}));
+
+
+		// Estructura jerárquica de opciones con preguntas y varias respuestas
+		/* const optionsMap = {
+			"profesional": {
+				pregunta: "¿Cuál es tu especialidad?",
+				respuestas: [
+					{ id: "desarrollador", texto: "Desarrollador" },
+					{ id: "diseniador", texto: "Diseñador" },
+					{ id: "gestor_proyectos", texto: "Gestor de Proyectos" },
+				],
+			},
+			"usuario": {
+				pregunta: "¿Cómo te gustaría comenzar?",
+				respuestas: [
+					{ id: "crear_cuenta", texto: "Crear cuenta" },
+					{ id: "iniciar_sesion", texto: "Iniciar sesión" },
+					{ id: "recuperar_contrasena", texto: "Recuperar contraseña" },
+				],
+			},
+			"desarrollador": {
+				pregunta: "¿Qué tipo de desarrollo te interesa?",
+				respuestas: [
+					{ id: "frontend", texto: "Frontend" },
+					{ id: "backend", texto: "Backend" },
+					{ id: "fullstack", texto: "Fullstack" },
+				],
+			},
+			"frontend": {
+				pregunta: "¿Qué tipo de desarrollo Frontend?",
+				respuestas: [
+					{ id: "maquetacion", texto: "Maquetación" },
+					{ id: "charts", texto: "Charts" },
+					{ id: "mapas", texto: "Mapas" },
+				],
+			},
+		}; */
+
+		const optionsMap = {
+			"profesional": {
+				pregunta: "¿Cuál es tu especialidad?",
+				respuestas: [
+					{ id: "desarrollador", texto: "Desarrollador" },
+					{ id: "diseniador", texto: "Diseñador" },
+					{ id: "gestor_proyectos", texto: "Gestor de Proyectos" },
+				],
+			},
+			"usuario": {
+				pregunta: "¿Cómo te gustaría comenzar?",
+				respuestas: [
+					{ id: "crear_cuenta", texto: "Crear cuenta" },
+					{ id: "iniciar_sesion", texto: "Iniciar sesión" },
+					{ id: "recuperar_contrasena", texto: "Recuperar contraseña" },
+				],
+			},
+			"desarrollador": {
+				pregunta: "¿Qué tipo de desarrollo te interesa?",
+				respuestas: [
+					{ id: "frontend", texto: "Frontend" },
+					{ id: "backend", texto: "Backend" },
+					{ id: "fullstack", texto: "Fullstack" },
+				],
+			},
+			"frontend": {
+				pregunta: "¿Qué tipo de desarrollo Frontend?",
+				respuestas: [
+					{ id: "maquetacion", texto: "Maquetación" },
+					{ id: "charts", texto: "Charts" },
+					{ id: "mapas", texto: "Mapas" },
+				],
+			},
+		};
+		async function obtenerRespuestasPorPregunta(id_pregunta) {
+			try {
+				// Realizamos el fetch a la API, enviando el id_pregunta
+				const response = await fetch(`http://localhost:3000/get-respuestas/${id_pregunta}`);
+
+				// Verificamos que la respuesta sea exitosa
+				if (!response.ok) {
+					throw new Error('Error al obtener las respuestas');
+				}
+
+				// Obtenemos los datos (suponemos que la API devuelve un array de ids de respuestas)
+				const respuestas = await response.json();
+				console.log("respuestas", respuestas)
+				// Simulamos que la API devuelve una lista de respuestas
+				// Aquí asumimos que nos devuelve un array de objetos con id_respuesta
+				return respuestas.map((respuesta, index) => ({
+					id: respuesta.id_respuesta,  // id de la respuesta
+					texto: `Respuesta ${index + 1}`, // Suponemos que la API devuelve un ID de respuesta, pero podemos agregar un texto genérico
+				}));
+			} catch (error) {
+				console.error("Hubo un error:", error);
+				return [];
+			}
+		}
+
+
+		// Función para actualizar las respuestas en el objeto optionsMap
+		async function actualizarRespuestasPorPregunta(id_pregunta) {
+			const nuevasRespuestas = await obtenerRespuestasPorPregunta(id_pregunta);
+
+			// Actualizamos el objeto optionsMap con las nuevas respuestas
+			if (nuevasRespuestas.length > 0) {
+				optionsMap["profesional"].respuestas = nuevasRespuestas;
+			}
+
+			// Mostramos el objeto actualizado para verificar
+			console.log("optionsMap", optionsMap);
+		}
+
+		actualizarRespuestasPorPregunta(1);
+
+
+
+
+
+
+
+
+
+
+		// Buscar la pregunta y las respuestas según la selección
+		const nextOptions = optionsMap[option];
+
+		// Mostrar mensaje del bot con la pregunta y las respuestas
+		if (nextOptions) {
+			const { pregunta, respuestas } = nextOptions;
+
+			// Formatear las respuestas para mostrar en el mensaje
+			const respuestasList = respuestas.map((res, index) => `${res}`).join("");
+
+			/* const botMessage = createChatBotMessage(`${pregunta}\n${respuestasList}`, {
+				widget: "dynamicOptions", // Widget dinámico para las nuevas opciones
+				payload: { options: respuestas }, // Pasar el array de respuestas al widget
+				delay: 500,
+			}); */
+
+			const botMessage = createChatBotMessage(pregunta, {
+				widget: "dynamicOptions",
+				payload: { options: respuestas }, // Pasar las opciones al widget
+				delay: 500,
+			});
+
+			setState((prevState) => ({
+				...prevState,
+				messages: [...prevState.messages, botMessage],
+			}));
+		} else {
+			// Si no hay más opciones, mostrar un mensaje por defecto
+			const noMoreOptionsMessage = createChatBotMessage("No hay más opciones disponibles.");
+			setState((prevState) => ({
+				...prevState,
+				messages: [...prevState.messages, noMoreOptionsMessage],
+			}));
+		}
+	};
+
+
+
+
+
+
+
+
+
+
+	const addUserMessage = (message) => {
+		console.log("Mensaje de usuario:", message);
+		setState((prevState) => ({
+			...prevState,
+			messages: [...prevState.messages, { text: message, user: true }],
+		}));
+	};
+
+	const addChatBotMessage = (message) => {
+		console.log("Mensaje del bot:", message);
+		setState((prevState) => ({
+			...prevState,
+			messages: [...prevState.messages, { text: message, user: false }],
+		}));
+	};
+
+	return (
+		<div>
+			{React.Children.map(children, (child) => {
+				return React.cloneElement(child, {
+					actions: {
+						handleStartOptions,
+						handleHello,
+						handleDog,
+						handleGetUsers,
+						handleUserForm,
+						handleOptionSelection,
+						addUserMessage,
+						addChatBotMessage,
+					},
+				});
+			})}
+		</div>
+	);
+};
+
+export default ActionProvider;
